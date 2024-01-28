@@ -346,3 +346,4 @@ pyrightconfig.json
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/vcs.xml
 /.idea/warehouse.iml
+/.idea/dataSources.xml
