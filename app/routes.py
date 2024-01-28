@@ -12,27 +12,28 @@ def home():
 
 
 @router.post("/parts/")
-def add_part(request: Request, part: Part):
+def add_part(request: Request, part_dto: Part):
     db = request.app.database
-    existing_part = db.parts.find_one({'serial_number': part.serial_number})
+
+    existing_part = db.parts.find_one({'serial_number': part_dto.serial_number})
     if existing_part:
         raise HTTPException(status_code=409, detail="Part with this serial number already exists")
 
-    db.parts.insert_one(part.model_dump())
-    return part
+    db.parts.insert_one(part_dto.model_dump())
+    return part_dto
 
 
 @router.post("/categories/")
-def add_category(request: Request, category: Category):
+def add_category(request: Request, category_dto: Category):
     db = request.app.database
-    existing_category_with_same_name = db.categorys.find_one({'name': category.name})
-    parent_category = db.categorys.find_one({'name': category.parent_name})
 
+    existing_category_with_same_name = db.categories.find_one({'name': category_dto.name})
     if existing_category_with_same_name:
         raise HTTPException(status_code=409, detail="Category with this name number already exists")
 
-    if category.parent_name != '' and parent_category is None:
+    parent_category = db.categories.find_one({'name': category_dto.parent_name})
+    if category_dto.parent_name != '' and parent_category is None:
         raise HTTPException(status_code=400, detail="Category with this parent name does not exist")
 
-    db.categorys.insert_one(category.model_dump())
-    return category
+    db.categories.insert_one(category_dto.model_dump())
+    return category_dto
