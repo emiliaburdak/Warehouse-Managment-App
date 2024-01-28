@@ -10,7 +10,7 @@ from app.main import app
 client = TestClient(app)
 
 
-class TestRoutes(TestCase):
+class TestPartRoute(TestCase):
     @classmethod
     def setUpClass(cls):
         app.mongodb_client = MongoClient(os.getenv("TEST_DB_URI"))
@@ -24,6 +24,24 @@ class TestRoutes(TestCase):
     def tearDownClass(cls):
         app.mongodb_client.drop_database(os.getenv("TEST_DB_NAME"))
         app.mongodb_client.close()
+
+    @staticmethod
+    def generate_part_data(serial_number: str, category: str):
+        return {
+            "serial_number": serial_number,
+            "name": "test_name",
+            "description": "test_description",
+            "category": category,
+            "quantity": 10,
+            "price": 19.99,
+            "location": {
+                "room": "test_room",
+                "bookcase": "test_bookcase",
+                "shelf": "test_shelf",
+                "cuvette": "test_cuvette",
+                "column": "test_column",
+
+                "row": "test_row"}}
 
     def test_add_part_with_unique_serial_number_and_non_base_category(self):
         # create base category category_A
@@ -55,41 +73,4 @@ class TestRoutes(TestCase):
 
         part_data = self.generate_part_data(serial_number='#1', category='category_A')
         response = client.post("/parts/", json=part_data)
-        assert response.status_code == HTTPStatus.BAD_REQUEST
-
-    @staticmethod
-    def generate_part_data(serial_number: str, category: str):
-        return {
-            "serial_number": serial_number,
-            "name": "test_name",
-            "description": "test_description",
-            "category": category,
-            "quantity": 10,
-            "price": 19.99,
-            "location": {
-                "room": "test_room",
-                "bookcase": "test_bookcase",
-                "shelf": "test_shelf",
-                "cuvette": "test_cuvette",
-                "column": "test_column",
-                "row": "test_row"}}
-
-    def test_add_categories(self):
-        response = client.post("/categories/", json={
-            'name': 'category_A',
-            'parent_name': ''
-        })
-        assert response.status_code == HTTPStatus.OK
-
-        second_response = client.post("/categories/", json={
-            'name': 'subcategory_A1',
-            'parent_name': 'category_A'
-        })
-        assert second_response.status_code == HTTPStatus.OK
-
-    def test_require_valid_parent_category(self):
-        response = client.post("/categories/", json={
-            'name': 'category_A',
-            'parent_name': 'category_Z'
-        })
         assert response.status_code == HTTPStatus.BAD_REQUEST
