@@ -30,12 +30,45 @@ class TestRoutes(TestCase):
         assert response.status_code == 200
         assert response.json() == {"message": "Hello World"}
 
-    def test_add_part_with_unique_serial_number(self):
-        part_data = {
-            "serial_number": "123",
+    def test_add_part_with_unique_serial_number_and_non_base_category(self):
+        # create base category category_A
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        # create category subcategory_A
+        client.post("/categories/", json={
+            'name': 'subcategory_A',
+            'parent_name': 'category_A'
+        })
+
+        part_data = self.generate_part_data(serial_number='#1', category='subcategory_A')
+        response = client.post("/parts/", json=part_data)
+        assert response.status_code == HTTPStatus.OK
+
+        # ensure it's not possible to add part with the same serial_number
+        second_response = client.post("/parts/", json=part_data)
+        assert second_response.status_code == HTTPStatus.CONFLICT
+
+    def test_prevent_adding_part_with_base_category(self):
+        # create base category category_A
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        part_data = self.generate_part_data(serial_number='#1', category='category_A')
+        response = client.post("/parts/", json=part_data)
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    @staticmethod
+    def generate_part_data(serial_number: str, category: str):
+        return {
+            "serial_number": serial_number,
             "name": "test_name",
             "description": "test_description",
-            "category": "test_category",
+            "category": category,
             "quantity": 10,
             "price": 19.99,
             "location": {
@@ -45,13 +78,6 @@ class TestRoutes(TestCase):
                 "cuvette": "test_cuvette",
                 "column": "test_column",
                 "row": "test_row"}}
-
-        response = client.post("/parts/", json=part_data)
-        assert response.status_code == HTTPStatus.OK
-
-        # ensure it's not possible to add part with the same serial_number
-        second_response = client.post("/parts/", json=part_data)
-        assert second_response.status_code == HTTPStatus.CONFLICT
 
     def test_add_categories(self):
         response = client.post("/categories/", json={

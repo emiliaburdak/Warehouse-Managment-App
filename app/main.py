@@ -11,6 +11,8 @@ load_dotenv()
 app = FastAPI()
 
 
+# TODO: on_event can be replaced with newer approach i.e. lifespan
+# https://fastapi.tiangolo.com/advanced/events/#lifespan
 @app.on_event("startup")
 def startup_db_client():
     app.mongodb_client = MongoClient(os.getenv("DB_URI"))
