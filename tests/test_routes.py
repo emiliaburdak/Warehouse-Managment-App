@@ -25,11 +25,6 @@ class TestRoutes(TestCase):
         app.mongodb_client.drop_database(os.getenv("TEST_DB_NAME"))
         app.mongodb_client.close()
 
-    def test_read_main(self):
-        response = client.get("/")
-        assert response.status_code == 200
-        assert response.json() == {"message": "Hello World"}
-
     def test_add_part_with_unique_serial_number_and_non_base_category(self):
         # create base category category_A
         client.post("/categories/", json={

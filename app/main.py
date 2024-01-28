@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from pymongo import MongoClient
 
-from app.routes import router
+from app.routes.category_route import router as category_route
+from app.routes.part_route import router as part_route
 
 load_dotenv()
 
@@ -24,4 +25,5 @@ def shutdown_db_client():
     app.mongodb_client.close()
 
 
-app.include_router(router)
+app.include_router(part_route)
+app.include_router(category_route)
