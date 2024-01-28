@@ -74,3 +74,26 @@ class TestPartRoute(TestCase):
         part_data = self.generate_part_data(serial_number='#1', category='category_A')
         response = client.post("/parts/", json=part_data)
         assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_update_part(self):
+        # create base category category_A
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+        # create category subcategory_A
+        client.post("/categories/", json={
+            'name': 'subcategory_A',
+            'parent_name': 'category_A'
+        })
+
+        part_data = self.generate_part_data(serial_number='111', category='subcategory_A')
+        client.post("/parts/", json=part_data)
+
+        # update part
+        response = client.put("/parts/111", json={
+            'name': 'new name',
+        })
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()['name'] == 'new name'

@@ -1,6 +1,7 @@
 from fastapi import HTTPException, APIRouter, Request
+from fastapi.encoders import jsonable_encoder
 
-from app.models.part import Part
+from app.models.part import Part, UpdatePart
 
 router = APIRouter()
 
@@ -19,3 +20,21 @@ def add_part(request: Request, part_dto: Part):
 
     db.parts.insert_one(part_dto.model_dump())
     return part_dto
+
+
+@router.put("/parts/{serial_number}")
+def update_part(serial_number: str, request: Request, update_part_dto: UpdatePart):
+    db = request.app.database
+
+    existing_part = db.parts.find_one({'serial_number': serial_number})
+    if not existing_part:
+        raise HTTPException(status_code=404, detail="Part not found")
+
+    fields_to_update = {field: value for field, value in update_part_dto.model_dump(exclude_unset=True).items() if
+                        value is not None}
+
+    # TODO: handle changing category
+
+    db.parts.update_one({'serial_number': serial_number}, {'$set': fields_to_update})
+    updated_part = db.parts.find_one({'serial_number': serial_number})
+    return jsonable_encoder(updated_part, exclude=['_id'])
