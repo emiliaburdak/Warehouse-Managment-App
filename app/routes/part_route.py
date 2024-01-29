@@ -60,6 +60,17 @@ def get_parts(request: Request):
     return jsonable_encoder(parts_list, exclude=['_id'])
 
 
+@router.delete("/parts/{serial_number}", status_code=204)
+def delete_part(serial_number: str, request: Request):
+    db = request.app.database
+    delete_result = db.parts.delete_one({'serial_number': serial_number})
+    if delete_result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Part not found")
+
+
+
+
+
 
 
 

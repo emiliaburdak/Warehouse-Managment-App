@@ -174,3 +174,19 @@ class TestPartRoute(TestCase):
         assert 'subcategory_A1' in categories
         assert 'subcategory_A2' in categories
 
+    def test_delete_part(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A1',
+            'parent_name': 'category_A'
+        })
+
+        part_data = self.generate_part_data(serial_number='111', category='subcategory_A1')
+        client.post("/parts/", json=part_data)
+
+        result = client.delete("/parts/111")
+        assert result.status_code == HTTPStatus.NO_CONTENT
