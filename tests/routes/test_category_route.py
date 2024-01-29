@@ -36,7 +36,7 @@ class TestCategoryRoute(TestCase):
             'name': 'subcategory_A1',
             'parent_name': 'category_A'
         })
-        assert second_response.status_code == HTTPStatus.OK
+        assert second_response.status_code == HTTPStatus.CREATED
 
     def test_require_valid_parent_category(self):
         response = client.post("/categories/", json={

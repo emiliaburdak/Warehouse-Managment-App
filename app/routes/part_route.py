@@ -6,7 +6,7 @@ from app.models.part import Part, UpdatePart
 router = APIRouter()
 
 
-@router.post("/parts/")
+@router.post("/parts/", status_code=201)
 def add_part(request: Request, part_dto: Part):
     db = request.app.database
 

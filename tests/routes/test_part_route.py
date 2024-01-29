@@ -58,7 +58,7 @@ class TestPartRoute(TestCase):
 
         part_data = self.generate_part_data(serial_number='#1', category='subcategory_A')
         response = client.post("/parts/", json=part_data)
-        assert response.status_code == HTTPStatus.OK
+        assert response.status_code == HTTPStatus.CREATED
 
         # ensure it's not possible to add part with the same serial_number
         second_response = client.post("/parts/", json=part_data)

@@ -6,7 +6,7 @@ from app.models.part import Part
 router = APIRouter()
 
 
-@router.post("/categories/")
+@router.post("/categories/", status_code=201)
 def add_category(request: Request, category_dto: Category):
     db = request.app.database
 
