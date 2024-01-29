@@ -191,3 +191,93 @@ class TestCategoryRoute(TestCase):
         assert 'sub_subcategory' in categories_names_list
         assert 'category_A' in categories_names_list
 
+    def test_prevent_delete_category_if_category_contain_parts(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'sub_subcategory_A',
+            'parent_name': 'subcategory_A'
+        })
+
+        part_data = self.generate_part_data(serial_number='111', category='subcategory_A')
+        client.post("/parts/", json=part_data)
+
+        result = client.delete("/categories/subcategory_A")
+        assert result.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_prevent_delete_category_if_child_category_contain_parts(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'sub_subcategory_A',
+            'parent_name': 'subcategory_A'
+        })
+
+        part_data = self.generate_part_data(serial_number='111', category='sub_subcategory_A')
+        client.post("/parts/", json=part_data)
+
+        result = client.delete("/categories/subcategory_A")
+        assert result.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_delete_category(self):
+        # if there are no parts in category and child category
+        # we are deleting category and update child category 'parent_name'
+
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'sub_subcategory_A',
+            'parent_name': 'subcategory_A'
+        })
+
+        result = client.delete("/categories/subcategory_A")
+        assert result.status_code == HTTPStatus.NO_CONTENT
+        response = client.get("/categories/sub_subcategory_A")
+        assert response.json()['parent_name'] == 'category_A'
+
+    def test_delete_base_category(self):
+        # if parent_category was base category now child category become base category
+
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'sub_subcategory_A',
+            'parent_name': 'subcategory_A'
+        })
+
+        result = client.delete("/categories/category_A")
+        assert result.status_code == HTTPStatus.NO_CONTENT
+        response = client.get("/categories/subcategory_A")
+        assert response.json()['parent_name'] == ''
