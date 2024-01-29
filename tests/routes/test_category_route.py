@@ -30,7 +30,7 @@ class TestCategoryRoute(TestCase):
             'name': 'category_A',
             'parent_name': ''
         })
-        assert response.status_code == HTTPStatus.OK
+        assert response.status_code == HTTPStatus.CREATED
 
         second_response = client.post("/categories/", json={
             'name': 'subcategory_A1',
@@ -150,4 +150,44 @@ class TestCategoryRoute(TestCase):
         assert response.json()['name'] == 'subcategory'
         assert response.json()['parent_name'] == ''
 
+    def test_get_category(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory',
+            'parent_name': 'category_A'
+        })
+
+        response = client.get("/categories/subcategory")
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()['name'] == "subcategory"
+        assert response.json()['parent_name'] == "category_A"
+
+    def test_get_all_categories(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'sub_subcategory',
+            'parent_name': 'subcategory'
+        })
+
+        response = client.get("/categories/")
+        assert response.status_code == HTTPStatus.OK
+
+        response_data = response.json()
+        categories_names_list = [category['name'] for category in response_data]
+        assert 'subcategory' in categories_names_list
+        assert 'sub_subcategory' in categories_names_list
+        assert 'category_A' in categories_names_list
 

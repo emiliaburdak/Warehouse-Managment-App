@@ -55,7 +55,21 @@ def update_category(category: str, request: Request, update_category_dto: Update
     return jsonable_encoder(updated_category, exclude=['_id'])
 
 
+@router.get("/categories/{category}")
+def get_category(category: str, request: Request):
+    db = request.app.database
+    found_category = db.categories.find_one({'name': category})
+    if not found_category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return jsonable_encoder(found_category, exclude=['_id'])
 
+
+@router.get("/categories/")
+def get_all_categories(request: Request):
+    db = request.app.database
+    found_categories = db.categories.find({})
+    category_list = [Category(**category) for category in found_categories]
+    return jsonable_encoder(category_list, exclude=['_id'])
 
 
 
