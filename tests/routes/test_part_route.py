@@ -97,3 +97,25 @@ class TestPartRoute(TestCase):
 
         assert response.status_code == HTTPStatus.OK
         assert response.json()['name'] == 'new name'
+
+    def test_prevent_to_update_category_to_base_category(self):
+        # create base category category_A
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+        # create category subcategory_A
+        client.post("/categories/", json={
+            'name': 'subcategory_A',
+            'parent_name': 'category_A'
+        })
+
+        part_data = self.generate_part_data(serial_number='111', category='subcategory_A')
+        client.post("/parts/", json=part_data)
+
+        # update part
+        response = client.put("/parts/111", json={
+            'category': 'category_A',
+        })
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST

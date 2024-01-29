@@ -14,12 +14,16 @@ def add_part(request: Request, part_dto: Part):
     if existing_part:
         raise HTTPException(status_code=409, detail="Part with this serial number already exists")
 
-    category = db.categories.find_one({'name': part_dto.category})
-    if category is None or category['parent_name'] == '':
-        raise HTTPException(status_code=400, detail="Incorrect category, part can't be created")
+    handle_no_parent_category(db, part_dto)
 
     db.parts.insert_one(part_dto.model_dump())
     return part_dto
+
+
+def handle_no_parent_category(db, part_dto):
+    category = db.categories.find_one({'name': part_dto.category})
+    if category is None or category['parent_name'] == '':
+        raise HTTPException(status_code=400, detail="Incorrect category, part can't be created")
 
 
 @router.put("/parts/{serial_number}")
@@ -34,7 +38,13 @@ def update_part(serial_number: str, request: Request, update_part_dto: UpdatePar
                         value is not None}
 
     # TODO: handle changing category
+    if 'category' in fields_to_update:
+        handle_no_parent_category(db, update_part_dto)
 
     db.parts.update_one({'serial_number': serial_number}, {'$set': fields_to_update})
     updated_part = db.parts.find_one({'serial_number': serial_number})
     return jsonable_encoder(updated_part, exclude=['_id'])
+
+
+
+
