@@ -37,13 +37,28 @@ def update_part(serial_number: str, request: Request, update_part_dto: UpdatePar
     fields_to_update = {field: value for field, value in update_part_dto.model_dump(exclude_unset=True).items() if
                         value is not None}
 
-    # TODO: handle changing category
     if 'category' in fields_to_update:
         handle_no_parent_category(db, update_part_dto)
 
     db.parts.update_one({'serial_number': serial_number}, {'$set': fields_to_update})
     updated_part = db.parts.find_one({'serial_number': serial_number})
     return jsonable_encoder(updated_part, exclude=['_id'])
+
+
+@router.get("/parts/{serial_number}")
+def get_part(serial_number: str, request: Request):
+    db = request.app.database
+    found_part = db.parts.find_one({'serial_number': serial_number})
+    return jsonable_encoder(found_part, exclude=['_id'])
+
+
+@router.get("/parts/")
+def get_parts(request: Request):
+    db = request.app.database
+    found_parts = db.parts.find({})
+    parts_list = [Part(**part) for part in found_parts]
+    return jsonable_encoder(parts_list, exclude=['_id'])
+
 
 
 

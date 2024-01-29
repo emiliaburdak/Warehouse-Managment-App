@@ -119,3 +119,58 @@ class TestPartRoute(TestCase):
         })
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_get_particular_part(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A1',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A2',
+            'parent_name': 'category_A'
+        })
+
+        part_data_1 = self.generate_part_data(serial_number='1', category='subcategory_A1')
+        client.post("/parts/", json=part_data_1)
+        part_data_2 = self.generate_part_data(serial_number='2', category='subcategory_A2')
+        client.post("/parts/", json=part_data_2)
+
+        response = client.get("/parts/1")
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()['category'] == 'subcategory_A1'
+
+    def test_get_all_parts(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A1',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A2',
+            'parent_name': 'category_A'
+        })
+
+        part_data_1 = self.generate_part_data(serial_number='1', category='subcategory_A1')
+        client.post("/parts/", json=part_data_1)
+        part_data_2 = self.generate_part_data(serial_number='2', category='subcategory_A2')
+        client.post("/parts/", json=part_data_2)
+
+        response = client.get("/parts/")
+        assert response.status_code == HTTPStatus.OK
+
+        response_data = response.json()
+        categories = [part['category'] for part in response_data]
+        assert 'subcategory_A1' in categories
+        assert 'subcategory_A2' in categories
+
