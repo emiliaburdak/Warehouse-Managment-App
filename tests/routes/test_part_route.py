@@ -190,3 +190,69 @@ class TestPartRoute(TestCase):
 
         result = client.delete("/parts/111")
         assert result.status_code == HTTPStatus.NO_CONTENT
+
+    def test_search(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A1',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A2',
+            'parent_name': 'category_A'
+        })
+
+        part_data_1 = self.generate_part_data(serial_number='1', category='subcategory_A1')
+        r1 = client.post("/parts/", json=part_data_1)
+        assert r1.status_code == HTTPStatus.CREATED
+
+        part_data_2 = self.generate_part_data(serial_number='2', category='subcategory_A2')
+        r2 = client.post("/parts/", json=part_data_2)
+        assert r2.status_code == HTTPStatus.CREATED
+
+        search_params = {
+            'name': 'test_name',
+            'category': 'subcategory_A2'
+        }
+        response = client.get("/parts/search/", params=search_params)
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()[0]['category'] == 'subcategory_A2'
+
+    def test_search_invalid_input(self):
+        client.post("/categories/", json={
+            'name': 'category_A',
+            'parent_name': ''
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A1',
+            'parent_name': 'category_A'
+        })
+
+        client.post("/categories/", json={
+            'name': 'subcategory_A2',
+            'parent_name': 'category_A'
+        })
+
+        part_data_1 = self.generate_part_data(serial_number='1', category='subcategory_A1')
+        r1 = client.post("/parts/", json=part_data_1)
+        assert r1.status_code == HTTPStatus.CREATED
+
+        part_data_2 = self.generate_part_data(serial_number='2', category='subcategory_A2')
+        r2 = client.post("/parts/", json=part_data_2)
+        assert r2.status_code == HTTPStatus.CREATED
+
+        search_params = {
+            'name': 'test_name',
+            'category': 'subcategory_B'
+        }
+        response = client.get("/parts/search/", params=search_params)
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json() == []

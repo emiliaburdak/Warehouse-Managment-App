@@ -1,4 +1,4 @@
-from fastapi import HTTPException, APIRouter, Request
+from fastapi import HTTPException, APIRouter, Request, Depends
 from fastapi.encoders import jsonable_encoder
 
 from app.models.part import Part, UpdatePart
@@ -68,7 +68,26 @@ def delete_part(serial_number: str, request: Request):
         raise HTTPException(status_code=404, detail="Part not found")
 
 
+@router.get("/parts/search/")
+def search_part(request: Request, searched_parameters: UpdatePart = Depends()):
+    db = request.app.database
+    query = {}
 
+    if searched_parameters.name is not None:
+        query['name'] = searched_parameters.name
+    if searched_parameters.description is not None:
+        query['description'] = searched_parameters.description
+    if searched_parameters.category is not None:
+        query['category'] = searched_parameters.category
+    if searched_parameters.quantity is not None:
+        query['quantity'] = searched_parameters.quantity
+    if searched_parameters.price is not None:
+        query['price'] = searched_parameters.price
+    if searched_parameters.location is not None:
+        query['location'] = searched_parameters.location.model_dump()
+
+    searched_parts = db.parts.find(query)
+    return [Part(**part) for part in searched_parts]
 
 
 
