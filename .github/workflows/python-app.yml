@@ -1,0 +1,33 @@
+name: Python application test
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Set up environment variables
+        run: |
+          echo "DB_URI=mongodb://localhost:27017" >> $GITHUB_ENV
+          echo "DB_NAME=test_db" >> $GITHUB_ENV
+
+      - name: Test with pytest
+        run: |
+          pytest
