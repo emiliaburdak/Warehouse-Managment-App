@@ -11,8 +11,8 @@ def generate_part_data(serial_number: str, category: str):
             "bookcase": "test_bookcase",
             "shelf": "test_shelf",
             "cuvette": "test_cuvette",
-            "column": "test_column",
-            "row": "test_row"}}
+            "column": 7,
+            "row": 13}}
 
 
 def init_db_with_exemplary_data_if_not_exists(db):

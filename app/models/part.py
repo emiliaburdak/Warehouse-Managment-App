@@ -1,14 +1,15 @@
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class Location(BaseModel):
-    room: str
-    bookcase: str
-    shelf: str
-    cuvette: str
-    column: str
-    row: str
+    room: str = Field(...)
+    bookcase: str = Field(...)
+    shelf: str = Field(...)
+    cuvette: str = Field(...)
+    column: int = Field(...)
+    row: int = Field(...)
 
 
 class Part(BaseModel):
