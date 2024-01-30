@@ -25,8 +25,8 @@ jobs:
 
       - name: Set up environment variables
         run: |
-          echo "DB_URI=mongodb://localhost:27017" >> $GITHUB_ENV
-          echo "DB_NAME=test_db" >> $GITHUB_ENV
+          echo "TEST_DB_URI=mongodb://localhost:27017" >> $GITHUB_ENV
+          echo "TEST_DB_NAME=test_db" >> $GITHUB_ENV
 
       - name: Test with pytest
         run: |
