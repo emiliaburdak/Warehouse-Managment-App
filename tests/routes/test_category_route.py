@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from pymongo import MongoClient
 
 from app.main import app
+from app.utils.exemplary_data_generator import generate_part_data
 
 client = TestClient(app)
 
@@ -90,24 +91,6 @@ class TestCategoryRoute(TestCase):
         assert response.status_code == HTTPStatus.OK
         assert response.json()['parent_name'] == 'category_B'
 
-    @staticmethod
-    def generate_part_data(serial_number: str, category: str):
-        return {
-            "serial_number": serial_number,
-            "name": "test_name",
-            "description": "test_description",
-            "category": category,
-            "quantity": 10,
-            "price": 19.99,
-            "location": {
-                "room": "test_room",
-                "bookcase": "test_bookcase",
-                "shelf": "test_shelf",
-                "cuvette": "test_cuvette",
-                "column": "test_column",
-
-                "row": "test_row"}}
-
     def test_reject_base_category_update_for_category_containing_parts(self):
         client.post("/categories/", json={
             'name': 'category_A',
@@ -119,7 +102,7 @@ class TestCategoryRoute(TestCase):
             'parent_name': 'category_A'
         })
 
-        part_data = self.generate_part_data(serial_number='111', category='subcategory')
+        part_data = generate_part_data(serial_number='111', category='subcategory')
         client.post("/parts/", json=part_data)
 
         response = client.put("/categories/subcategory", json={
@@ -139,7 +122,7 @@ class TestCategoryRoute(TestCase):
             'parent_name': 'category_A'
         })
 
-        part_data = self.generate_part_data(serial_number='111', category='not_matching_category')
+        part_data = generate_part_data(serial_number='111', category='not_matching_category')
         client.post("/parts/", json=part_data)
 
         response = client.put("/categories/subcategory", json={
@@ -207,7 +190,7 @@ class TestCategoryRoute(TestCase):
             'parent_name': 'subcategory_A'
         })
 
-        part_data = self.generate_part_data(serial_number='111', category='subcategory_A')
+        part_data = generate_part_data(serial_number='111', category='subcategory_A')
         client.post("/parts/", json=part_data)
 
         result = client.delete("/categories/subcategory_A")
@@ -229,7 +212,7 @@ class TestCategoryRoute(TestCase):
             'parent_name': 'subcategory_A'
         })
 
-        part_data = self.generate_part_data(serial_number='111', category='sub_subcategory_A')
+        part_data = generate_part_data(serial_number='111', category='sub_subcategory_A')
         client.post("/parts/", json=part_data)
 
         result = client.delete("/categories/subcategory_A")

@@ -10,3 +10,4 @@ class Category(BaseModel):
 class UpdateCategory(BaseModel):
     name: Optional[str] = None
     parent_name: Optional[str] = None
+
