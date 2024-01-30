@@ -51,6 +51,7 @@ Our MongoDB database is structured into two separate collections: parts and cate
 
 
 ### Parts Collection Endpoints
+_I recommend using **swagger** that can be accessed on `/docs`, in case of local dev it will be `localhost:8080/docs`_ 
 
 #### `POST /parts/`
 - **Description**: Add a new part to the warehouse.
