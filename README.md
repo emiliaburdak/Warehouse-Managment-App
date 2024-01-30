@@ -7,6 +7,11 @@ Welcome to the Parts Warehouse RestAPI project! This project is designed to mana
 ## Why FastAPI?
 
 FastAPI was the go-to choice for its great suitability for REST APIs, pleasant official documentation of the fastAPI itself, flexibility, and speed. It allows quick development, automatic Swagger documentation, and can handle asynchronous tasks really well — all key for a top-notch API.
+
+## Continuous Integration
+
+There is **Github Action** configured that creates temporary mongod and executes tests
+
 ## Setup & Installation
 
 1. Clone the repository. 
