@@ -24,12 +24,12 @@ def init_db_with_exemplary_data_if_not_exists(db):
     db.categories.insert_one({'name': 'DemoSubCategoryA', 'parent_name': 'DemoMainCategory'})
     db.categories.insert_one({'name': 'DemoSubCategoryB', 'parent_name': 'DemoMainCategory'})
 
-    db.parts.insert_one(generate_part_data('#1', 'DemoSubCategoryA'))
-    db.parts.insert_one(generate_part_data('#2', 'DemoSubCategoryA'))
-    db.parts.insert_one(generate_part_data('#3', 'DemoSubCategoryA'))
+    db.parts.insert_one(generate_part_data('sn1', 'DemoSubCategoryA'))
+    db.parts.insert_one(generate_part_data('sn2', 'DemoSubCategoryA'))
+    db.parts.insert_one(generate_part_data('sn3', 'DemoSubCategoryA'))
 
-    db.parts.insert_one(generate_part_data('#4', 'DemoSubCategoryB'))
-    db.parts.insert_one(generate_part_data('#5', 'DemoSubCategoryB'))
-    db.parts.insert_one(generate_part_data('#6', 'DemoSubCategoryB'))
+    db.parts.insert_one(generate_part_data('sn4', 'DemoSubCategoryB'))
+    db.parts.insert_one(generate_part_data('sn5', 'DemoSubCategoryB'))
+    db.parts.insert_one(generate_part_data('sn6', 'DemoSubCategoryB'))
 
     db.demo_config.insert_one({'has_inserted_demo_examples': True})

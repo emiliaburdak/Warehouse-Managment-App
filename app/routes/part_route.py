@@ -1,7 +1,7 @@
 from fastapi import HTTPException, APIRouter, Request, Depends
 from fastapi.encoders import jsonable_encoder
 
-from app.models.part import Part, UpdatePart
+from app.models.part import Part, UpdatePart, SearchPart
 
 router = APIRouter()
 
@@ -18,10 +18,11 @@ def handle_no_parent_category(db, category):
         raise HTTPException(status_code=400, detail="Incorrect category, part can't be created")
 
 
-def ensure_that_part_exist(db, serial_number):
+def find_part_or_throw_not_found(db, serial_number):
     existing_part = db.parts.find_one({'serial_number': serial_number})
     if not existing_part:
         raise HTTPException(status_code=404, detail="Part not found")
+    return existing_part
 
 
 @router.post("/parts/", status_code=201)
@@ -40,13 +41,18 @@ def add_part(request: Request, part_dto: Part):
 def update_part(serial_number: str, request: Request, update_part_dto: UpdatePart):
     db = request.app.database
 
-    ensure_that_part_exist(db, serial_number)
+    original_part = find_part_or_throw_not_found(db, serial_number)
 
     fields_to_update = {field: value for field, value in update_part_dto.model_dump(exclude_unset=True).items() if
                         value is not None}
 
     if 'category' in fields_to_update:
         handle_no_parent_category(db, update_part_dto.category)
+
+    if 'location' in fields_to_update:
+        original_location = original_part['location']
+        new_location = update_part_dto.location.model_dump(exclude_none=True)
+        fields_to_update['location'] = {**original_location, **new_location}
 
     db.parts.update_one({'serial_number': serial_number}, {'$set': fields_to_update})
 
@@ -78,7 +84,7 @@ def delete_part(serial_number: str, request: Request):
 
 
 @router.get("/parts/search/")
-def search_part(request: Request, searched_parameters: UpdatePart = Depends()):
+def search_part(request: Request, searched_parameters: SearchPart = Depends()):
     db = request.app.database
     query = {}
 
@@ -92,8 +98,18 @@ def search_part(request: Request, searched_parameters: UpdatePart = Depends()):
         query['quantity'] = searched_parameters.quantity
     if searched_parameters.price is not None:
         query['price'] = searched_parameters.price
-    if searched_parameters.location is not None:
-        query['location'] = searched_parameters.location.model_dump()
+    if searched_parameters.room is not None:
+        query['location.room'] = searched_parameters.room
+    if searched_parameters.bookcase is not None:
+        query['location.bookcase'] = searched_parameters.bookcase
+    if searched_parameters.shelf is not None:
+        query['location.shelf'] = searched_parameters.shelf
+    if searched_parameters.cuvette is not None:
+        query['location.cuvette'] = searched_parameters.cuvette
+    if searched_parameters.column is not None:
+        query['location.column'] = searched_parameters.column
+    if searched_parameters.row is not None:
+        query['location.row'] = searched_parameters.row
 
     searched_parts = db.parts.find(query)
     return [Part(**part) for part in searched_parts]
