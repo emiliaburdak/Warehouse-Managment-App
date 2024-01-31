@@ -19,7 +19,7 @@ def add_part(request: Request, part_dto: Part):
     handle_no_parent_category(db, part_dto.category)
 
     db.parts.insert_one(part_dto.model_dump())
-    return part_dto
+    return jsonable_encoder(part_dto, exclude=['_id'])
 
 
 @router.put("/parts/{serial_number}")

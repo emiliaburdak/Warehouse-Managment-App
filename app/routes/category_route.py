@@ -25,7 +25,7 @@ def add_category(request: Request, category_dto: Category):
     ensure_that_parent_category_exist(db, category_dto.parent_name)
 
     db.categories.insert_one(category_dto.model_dump())
-    return category_dto
+    return jsonable_encoder(category_dto, exclude=['_id'])
 
 
 @router.put("/categories/{category}")
