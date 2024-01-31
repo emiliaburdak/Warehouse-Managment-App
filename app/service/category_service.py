@@ -1,6 +1,4 @@
-from fastapi import HTTPException, APIRouter, Request
-from fastapi.encoders import jsonable_encoder
-from app.models.category import Category, UpdateCategory
+from fastapi import HTTPException
 
 
 def ensure_that_parent_category_exist(db, parent_name):
