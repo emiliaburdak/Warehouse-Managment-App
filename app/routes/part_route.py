@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import HTTPException, APIRouter, Request, Depends
 from fastapi.encoders import jsonable_encoder
 from app.models.part import Part, UpdatePart, SearchPart
@@ -11,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/parts/", status_code=201)
-def add_part(request: Request, part_dto: Part):
+def add_part(request: Request, part_dto: Part) -> Part:
     db = request.app.database
 
     ensure_that_part_does_not_exist(db, part_dto.serial_number)
@@ -23,7 +25,7 @@ def add_part(request: Request, part_dto: Part):
 
 
 @router.put("/parts/{serial_number}")
-def update_part(serial_number: str, request: Request, update_part_dto: UpdatePart):
+def update_part(serial_number: str, request: Request, update_part_dto: UpdatePart) -> Part:
     db = request.app.database
 
     original_part = find_part_or_throw_not_found(db, serial_number)
@@ -46,14 +48,14 @@ def update_part(serial_number: str, request: Request, update_part_dto: UpdatePar
 
 
 @router.get("/parts/{serial_number}")
-def get_part(serial_number: str, request: Request):
+def get_part(serial_number: str, request: Request) -> Part:
     db = request.app.database
     found_part = db.parts.find_one({'serial_number': serial_number})
     return jsonable_encoder(found_part, exclude=['_id'])
 
 
 @router.get("/parts/")
-def get_parts(request: Request):
+def get_parts(request: Request) -> List[Part]:
     db = request.app.database
     found_parts = db.parts.find({})
     parts_list = [Part(**part) for part in found_parts]
@@ -69,7 +71,7 @@ def delete_part(serial_number: str, request: Request):
 
 
 @router.get("/parts/search/")
-def search_part(request: Request, searched_parameters: SearchPart = Depends()):
+def search_part(request: Request, searched_parameters: SearchPart = Depends()) -> List[Part]:
     db = request.app.database
     query = {}
 

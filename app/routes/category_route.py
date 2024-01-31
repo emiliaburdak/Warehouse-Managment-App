@@ -1,5 +1,9 @@
+from typing import List
+
 from fastapi import HTTPException, APIRouter, Request
 from fastapi.encoders import jsonable_encoder
+from pymongo.database import Database
+
 from app.models.category import Category, UpdateCategory
 from app.service.category_service import (
     ensure_that_parent_category_exist,
@@ -17,7 +21,7 @@ router = APIRouter()
 
 
 @router.post("/categories/", status_code=201)
-def add_category(request: Request, category_dto: Category):
+def add_category(request: Request, category_dto: Category) -> Category:
     db = request.app.database
 
     ensure_that_category_does_not_exist(db, category_dto.name)
@@ -29,7 +33,7 @@ def add_category(request: Request, category_dto: Category):
 
 
 @router.put("/categories/{category}")
-def update_category(category: str, request: Request, update_category_dto: UpdateCategory):
+def update_category(category: str, request: Request, update_category_dto: UpdateCategory) -> Category:
     db = request.app.database
 
     ensure_that_category_exist(db, category)
@@ -56,7 +60,7 @@ def update_category(category: str, request: Request, update_category_dto: Update
 
 
 @router.get("/categories/{category}")
-def get_category(category: str, request: Request):
+def get_category(category: str, request: Request) -> Category:
     db = request.app.database
     found_category = db.categories.find_one({'name': category})
     if not found_category:
@@ -65,7 +69,7 @@ def get_category(category: str, request: Request):
 
 
 @router.get("/categories/")
-def get_all_categories(request: Request):
+def get_all_categories(request: Request) -> List[Category]:
     db = request.app.database
     found_categories = db.categories.find({})
     category_list = [Category(**category) for category in found_categories]
